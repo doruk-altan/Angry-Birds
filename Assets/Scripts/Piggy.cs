@@ -7,6 +7,7 @@ public class Piggy : MonoBehaviour
     [SerializeField] private float maxHealth = 3f;
     [SerializeField] private float damageThreshold = .2f;
     [SerializeField] private GameObject piggyDeathParticles;
+    [SerializeField] private AudioClip deathClip;
 
     private float currentHealth;
 
@@ -30,6 +31,8 @@ public class Piggy : MonoBehaviour
         GameManager.instance.RemovePiggy(this);
 
         Instantiate(piggyDeathParticles, transform.position, Quaternion.identity);
+
+        AudioSource.PlayClipAtPoint(deathClip, transform.position);
 
         Destroy(gameObject);
     }

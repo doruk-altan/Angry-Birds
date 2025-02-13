@@ -25,10 +25,15 @@ public class SlingShotHandler : MonoBehaviour
 
     [Header("Scripts")]
     [SerializeField] private SlingShotArea slingShotArea;
+    [SerializeField] private CameraManager cameraManager;
 
     [Header("Bird")]
     [SerializeField] private AngieBird angieBirdPrefab;
     [SerializeField] private float angieBirdPositionOffset = .275f;
+
+    [Header("Sounds")]
+    [SerializeField] private AudioClip ellasticPulledClip;
+    [SerializeField] private AudioClip[] ellasticReleasedClips;
 
     private Vector2 slingshotLinesPosition;
     private Vector2 direction;
@@ -39,10 +44,14 @@ public class SlingShotHandler : MonoBehaviour
 
     private AngieBird spawnedAngieBird;
 
+    private AudioSource audioSource;
+
 
 
     private void Awake()
     {
+        audioSource = GetComponent<AudioSource>();
+
         leftLineRenderer.enabled = false;
         rightLineRenderer.enabled = false;
 
@@ -54,6 +63,12 @@ public class SlingShotHandler : MonoBehaviour
         if(InputManager.WasLeftMouseButtonPressed && slingShotArea.IsWithinSlingshotArea())
         {
             clickedWithinArea = true;
+
+            if (birdOnSlingshot)
+            {
+                SoundManager.Instance.PlayClip(ellasticPulledClip, audioSource);
+                cameraManager.SwitchToFollowCam(spawnedAngieBird.transform);
+            }
         }
 
         if (InputManager.IsLeftMouseButtonPressed && clickedWithinArea && birdOnSlingshot)
@@ -69,6 +84,8 @@ public class SlingShotHandler : MonoBehaviour
                 clickedWithinArea = false;
 
                 spawnedAngieBird.LaunchBird(direction, shotForce);
+
+                SoundManager.Instance.PlayRandomClip(ellasticReleasedClips, audioSource);
 
                 GameManager.instance.UseShot();
 
@@ -143,9 +160,13 @@ public class SlingShotHandler : MonoBehaviour
 
     private IEnumerator SpawnNewAngieBirdAfterTime()
     {
+
         yield return new WaitForSeconds(timeBetweenBirdRespawns);
 
+
         SpawnAngieBird();
+
+        cameraManager.SwitchToIdleCam();
     }
 
 
